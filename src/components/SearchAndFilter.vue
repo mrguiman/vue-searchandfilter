@@ -6,12 +6,12 @@
           <span>{{ filter.filter }}:{{filter.value}}</span>
         </div>
       </div>
-      <input type="text" v-model="internalValue" ref="rawInput" />
+      <input type="text" v-model="searchKeywords" ref="rawInput" v-on:keyup="handleInputs" />
     </div>
 
     <div v-if="availableFilters.length > 0" class="filters-dropdown">
       <div v-for="filter in availableFilters" v-bind:key="filter" class="filter-line" v-on:click="addFilter(filter)">
-        <span>{{ filter }}:</span> <span>{{ internalValue }}</span>
+        <span>{{ filter }}:</span> <span>{{ searchKeywords }}</span>
       </div>
     </div>
   </div>
@@ -26,15 +26,12 @@ export default {
 
   data() {
     return {
-      internalValue: "coucou",
+      searchKeywords: "",
       activeFilters: []
     }
   },
 
   computed: {
-    unboundKeywords() {
-      return this.internalValue
-    },
     availableFilters() {
       return this.filters.filter(val => {
         return this.activeFilters.map(x => x.filter).indexOf(val) === -1
@@ -46,10 +43,19 @@ export default {
     addFilter(filter) {
       this.activeFilters.push({
         filter: filter,
-        value: this.internalValue
+        value: this.searchKeywords
       });
-      this.internalValue = ""
+      this.searchKeywords = ""
       this.$refs.rawInput.focus();
+    },
+    handleInputs (e) {
+      if (e.key.toLowerCase() === "backspace" && this.searchKeywords.length === 0) {
+        // Pressed backspace on empty input means we get rid of the last filter
+        let lastFilter = this.activeFilters.pop();
+        if (lastFilter) {
+         this.searchKeywords = lastFilter.value;
+        }
+      }
     }
   }
 }
