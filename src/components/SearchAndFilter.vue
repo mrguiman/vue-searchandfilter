@@ -3,12 +3,7 @@ divs and a raw input -->
 <template>
   <div class="searchandfilter">
     <div class="input-wrapper">
-      <div class="active-filters" v-if="activeFilters.length > 0">
-        <div v-for="filter in activeFilters" v-bind:key="filter.filter" class="active-filter">
-          <span>{{ filter.filter }}:{{filter.value}}</span>
-        </div>
-      </div>
-      <input type="text" v-model="searchKeywords" ref="rawInput" v-on:keyup="handleInputs" />
+      <input type="text" v-model="searchKeywords" ref="rawInput" />
     </div>
 
     <div v-if="displayedFilters.length > 0" class="filters-dropdown">
@@ -41,7 +36,7 @@ export default {
     },
     displayedFilters() {
       return this.availableFilters.filter(val => {
-        return this.searchKeywords.indexOf(`${val}:`) === -1
+        return val.indexOf(this.searchKeywords) > -1;
       });
     },
     searchFilterRegex() {
@@ -66,27 +61,6 @@ export default {
         this.$refs.rawInput.focus();
       }
     },
-    addFilter(filter, value) {
-      let filterValue = value || this.searchKeywords;
-
-      this.activeFilters.push({
-        filter: filter,
-        value: filterValue
-      });
-
-      // Clean up the input after adding the filter
-      this.searchKeywords = this.searchKeywords.replace(filterValue, '').trim();
-      this.searchKeywords = this.searchKeywords.replace(`${filter}:`, '').trim();
-
-      this.$refs.rawInput.focus();
-    },
-    popFilter() {
-          // Pressed backspace on empty input means we get rid of the last filter
-          let lastFilter = this.activeFilters.pop();
-          if (lastFilter) {
-            this.searchKeywords = `${lastFilter.filter}:${lastFilter.value}`;
-          }
-    },
     tryMatchFilter() {
         const filterMatch = this.searchKeywords.match(new RegExp(this.searchFilterRegex, 'g'));
 
@@ -96,15 +70,6 @@ export default {
           this.addFilter(filter, value);
         }
     },
-    handleInputs (e) {
-      if (this.searchKeywords.length === 0) {
-        if (e.key.toLowerCase() === "backspace") {
-          this.popFilter();
-        }
-      } else if (this.availableFilters.length > 0) {
-        this.tryMatchFilter();
-      }
-    }
   }
 }
 </script>
@@ -116,42 +81,16 @@ export default {
   margin: auto;
 }
 .input-wrapper {
-  display: flex;
-  align-items: center;
   width: 100%;
   height: 40px;
   border: 1px solid #e2e2e2;
   border-radius: 5px;
   box-sizing: border-box;
   padding: 0 8px;
-  overflow: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.input-wrapper > * {
-  flex: 0 0 auto;
-}
-
-.input-wrapper::-webkit-scrollbar {
-  display: none
-}
-
-.input-wrapper .active-filters {
-  display: inline-block;
-}
-.active-filter {
-  display:inline-block;
-  background-color: #e2e2e2;
-  border-radius: 8px;
-  padding: 4px;
-}
-.active-filter+.active-filter {
-  margin-left: 8px;
 }
 
 .input-wrapper > input {
-  display: inline-block;
+  width: 100%;
   background: none;
   border: none;
   height: 100%;
