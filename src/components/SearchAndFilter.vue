@@ -4,7 +4,7 @@ divs and a raw input -->
   <div class="searchandfilter">
     <div class="input-wrapper">
       <div class="active-filters" v-if="activeFilters.length > 0">
-        <div v-for="filter in activeFilters" v-bind:key="filter.filter" class="active-filter">
+        <div v-for="filter in activeFilters" v-bind:key="filter.filter" class="active-filter" :id="`filter-${filter.filter}`">
           <span>{{ filter.filter }}:{{filter.value}}</span>
         </div>
       </div>
@@ -41,7 +41,7 @@ export default {
     },
     displayedFilters() {
       return this.availableFilters.filter(val => {
-        return this.searchKeywords.indexOf(`${val}:`) === -1
+        return val.indexOf(this.searchKeywords) > -1 || this.searchKeywords.startsWith(`${val}:`)
       });
     },
     searchFilterRegex() {
@@ -75,8 +75,8 @@ export default {
       });
 
       // Clean up the input after adding the filter
-      this.searchKeywords = this.searchKeywords.replace(filterValue, '').trim();
-      this.searchKeywords = this.searchKeywords.replace(`${filter}:`, '').trim();
+      this.searchKeywords = this.searchKeywords.replace(`${filter}:${filterValue}`, '').trim();
+      this.searchKeywords = this.searchKeywords.replace(`${filterValue}`, '').trim();
 
       this.$refs.rawInput.focus();
     },
@@ -119,22 +119,15 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
+  min-width: 40px;
   border: 1px solid #e2e2e2;
   border-radius: 5px;
   box-sizing: border-box;
-  padding: 0 8px;
+  padding: 4px;
   overflow: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.input-wrapper > * {
-  flex: 0 0 auto;
-}
-
-.input-wrapper::-webkit-scrollbar {
-  display: none
+  flex-wrap:wrap;
+  max-height: 80px;
+  overflow: auto;
 }
 
 .input-wrapper .active-filters {
@@ -142,12 +135,11 @@ export default {
 }
 .active-filter {
   display:inline-block;
+  text-align: left;
   background-color: #e2e2e2;
   border-radius: 8px;
   padding: 4px;
-}
-.active-filter+.active-filter {
-  margin-left: 8px;
+  margin: 4px;
 }
 
 .input-wrapper > input {
@@ -155,7 +147,8 @@ export default {
   background: none;
   border: none;
   height: 100%;
-  padding: 0 8px;
+  padding: 8px;
+  min-width: 50%;
   flex: 1;
 }
 
