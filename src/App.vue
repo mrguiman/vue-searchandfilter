@@ -15,7 +15,7 @@ export default {
   },
   data() {
     return {
-      searchFilters: ["country", "year"]
+      searchFilters: ["country", "year", "businessUnit", "businessterm"]
     }
   }
 }

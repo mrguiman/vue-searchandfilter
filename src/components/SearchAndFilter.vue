@@ -13,7 +13,7 @@ divs and a raw input -->
 
     <div v-if="displayedFilters.length > 0" class="filters-dropdown">
       <div v-for="filter in displayedFilters" v-bind:key="filter" class="filter-line" v-on:click="handleFilterClick(filter)">
-        <span>{{ filter }}:</span><span>{{ searchKeywords }}</span>
+        <span>{{ filter }}:</span><span>{{ searchKeywordsWithoutFilters }}</span>
       </div>
     </div>
   </div>
@@ -34,6 +34,9 @@ export default {
   },
 
   computed: {
+    searchKeywordsWithoutFilters() {
+      return this.searchKeywords.replace(new RegExp(`^${this.filterRegexSubstring}`, 'g'), '')
+    },
     availableFilters() {
       return this.filters.filter(val => {
         return this.activeFilters.map(x => x.filter).indexOf(val) === -1
@@ -44,8 +47,8 @@ export default {
         return val.indexOf(this.searchKeywords) > -1 || this.searchKeywords.startsWith(`${val}:`)
       });
     },
-    searchFilterRegex() {
-      let availableFiltersRegexSubstring = this.availableFilters.reduce((acc, curr) => {
+    filterRegexSubstring() {
+      let substr = this.availableFilters.reduce((acc, curr) => {
         if (acc.length > 0) {
           acc += "|"
         }
@@ -53,25 +56,28 @@ export default {
         return acc;
       }, '');
 
-      return `(${availableFiltersRegexSubstring}):([^\\s"']+ |"[^"]*"|'[^']*' )`
+      return `(${substr}):`
+    },
+    searchFilterRegex() {
+      return `${this.filterRegexSubstring}([^\\s"']+ |"[^"]*"|'[^']*' )`
     },
   },
 
   methods: {
     handleFilterClick(filter) {
       if (this.searchKeywords.length > 0) {
-        this.addFilter(filter, this.searchKeywords)
+        this.addFilter(filter, this.searchKeywordsWithoutFilters)
       } else {
         this.searchKeywords += `${filter}:`
         this.$refs.rawInput.focus();
       }
     },
     addFilter(filter, value) {
-      let filterValue = value || this.searchKeywords;
+      let filterValue = value || this.searchKeywordsWithoutFilters;
 
       this.activeFilters.push({
         filter: filter,
-        value: filterValue
+        value: filterValue.trim()
       });
 
       // Clean up the input after adding the filter
