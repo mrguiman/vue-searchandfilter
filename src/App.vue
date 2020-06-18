@@ -1,17 +1,22 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <SearchAndFilter :filters="searchFilters" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import SearchAndFilter from './components/SearchAndFilter.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    SearchAndFilter
+  },
+  data() {
+    return {
+      searchFilters: ["country"]
+    }
   }
 }
 </script>
